@@ -288,6 +288,15 @@ export function ChineseIcon({ className, size = 20 }: IconProps) {
   );
 }
 
+export function AllIcon({ className, size = 20 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="全部">
+      <title>全部</title>
+      <text x="12" y="17" textAnchor="middle" fontSize="12" fontWeight="bold" fill="currentColor">ALL</text>
+    </svg>
+  );
+}
+
 export function ForeignIcon({ className, size = 20 }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="外语">

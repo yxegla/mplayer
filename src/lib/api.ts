@@ -2,9 +2,9 @@ import type { Song, SearchResult, LyricLine, Platform } from '@/types/music';
 
 const API_BASE = '/api/music';
 
-export type PlaylistCategory = 'chinese' | 'foreign' | 'jpkr' | 'anime';
+export type PlaylistCategory = 'all' | 'chinese' | 'foreign' | 'jpkr' | 'anime';
 
-const PLAYLIST_IDS: Record<PlaylistCategory, string> = {
+const PLAYLIST_IDS: Record<Exclude<PlaylistCategory, 'all'>, string> = {
   chinese: '19723756',
   foreign: '180106',
   jpkr: '60131',
@@ -12,6 +12,7 @@ const PLAYLIST_IDS: Record<PlaylistCategory, string> = {
 };
 
 const STORAGE_KEY = 'mplayer_random_playlist';
+const CATEGORY_KEY = 'mplayer_selected_category';
 
 export function savePlaylist(songs: Song[], category: PlaylistCategory): void {
   try {
@@ -27,6 +28,22 @@ export function loadPlaylist(): { songs: Song[]; category: PlaylistCategory } | 
   } catch {
     return null;
   }
+}
+
+export function saveCategory(category: PlaylistCategory): void {
+  try {
+    localStorage.setItem(CATEGORY_KEY, category);
+  } catch {}
+}
+
+export function loadCategory(): PlaylistCategory {
+  try {
+    const data = localStorage.getItem(CATEGORY_KEY);
+    if (data && ['all', 'chinese', 'foreign', 'jpkr', 'anime'].includes(data)) {
+      return data as PlaylistCategory;
+    }
+  } catch {}
+  return 'all';
 }
 
 export async function searchSongs(keyword: string, platform: Platform = 'netease'): Promise<SearchResult> {
@@ -59,12 +76,27 @@ export async function getSongCover(song: Song): Promise<string> {
   return `${API_BASE}/cover?id=${song.id}&platform=${song.platform}`;
 }
 
-export async function getToplist(platform: Platform = 'netease', category?: PlaylistCategory): Promise<Song[]> {
-  const listId = category ? PLAYLIST_IDS[category] : '19723756';
+async function fetchPlaylist(listId: string, platform: Platform = 'netease'): Promise<Song[]> {
   const res = await fetch(`${API_BASE}/toplist?platform=${platform}&id=${listId}`);
   if (!res.ok) throw new Error('Failed to get toplist');
   const data = await res.json();
-  return data.songs.slice(0, 20);
+  return data.songs || [];
+}
+
+export async function getToplist(platform: Platform = 'netease', category?: PlaylistCategory): Promise<Song[]> {
+  if (!category || category === 'all') {
+    const allLists = await Promise.all(
+      Object.values(PLAYLIST_IDS).map(id => fetchPlaylist(id, platform).catch(() => []))
+    );
+    const allSongs = allLists.flat();
+    const shuffled = shuffleArray(allSongs);
+    return shuffled.slice(0, 20);
+  }
+  
+  const listId = PLAYLIST_IDS[category];
+  const songs = await fetchPlaylist(listId, platform);
+  const shuffled = shuffleArray(songs);
+  return shuffled.slice(0, 20);
 }
 
 export function shuffleArray<T>(array: T[]): T[] {
