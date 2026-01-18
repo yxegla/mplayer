@@ -279,48 +279,38 @@ export function PlatformIcon({ platform, className, size = 16 }: { platform: str
   }
 }
 
-export function HKIcon({ className, size = 20 }: IconProps) {
+export function ChineseIcon({ className, size = 20 }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className} role="img" aria-label="港台">
-      <title>港台</title>
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="中文">
+      <title>中文</title>
+      <text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">中</text>
     </svg>
   );
 }
 
-export function WesternIcon({ className, size = 20 }: IconProps) {
+export function ForeignIcon({ className, size = 20 }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className} role="img" aria-label="欧美">
-      <title>欧美</title>
-      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/>
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="外语">
+      <title>外语</title>
+      <text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">EN</text>
     </svg>
   );
 }
 
 export function JPKRIcon({ className, size = 20 }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className} role="img" aria-label="日韩">
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="日韩">
       <title>日韩</title>
-      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="12" cy="12" r="4" fill="currentColor"/>
+      <text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">日</text>
     </svg>
   );
 }
 
 export function AnimeIcon({ className, size = 20 }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className} role="img" aria-label="动漫">
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} role="img" aria-label="动漫">
       <title>动漫</title>
-      <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-    </svg>
-  );
-}
-
-export function MovieIcon({ className, size = 20 }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} className={className} role="img" aria-label="影视">
-      <title>影视</title>
-      <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+      <text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">漫</text>
     </svg>
   );
 }

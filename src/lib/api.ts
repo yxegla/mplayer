@@ -2,14 +2,13 @@ import type { Song, SearchResult, LyricLine, Platform } from '@/types/music';
 
 const API_BASE = '/api/music';
 
-export type PlaylistCategory = 'hk' | 'western' | 'jpkr' | 'anime' | 'movie';
+export type PlaylistCategory = 'chinese' | 'foreign' | 'jpkr' | 'anime';
 
 const PLAYLIST_IDS: Record<PlaylistCategory, string> = {
-  hk: '214532560',
-  western: '3778678',
-  jpkr: '60198',
+  chinese: '19723756',
+  foreign: '180106',
+  jpkr: '60131',
   anime: '71385702',
-  movie: '71385787',
 };
 
 const STORAGE_KEY = 'mplayer_random_playlist';

@@ -9,15 +9,14 @@ import SearchBar from '@/components/SearchBar';
 import SongList from '@/components/SongList';
 import MiniPlayer from '@/components/MiniPlayer';
 import NowPlaying from '@/components/NowPlaying';
-import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, HKIcon, WesternIcon, JPKRIcon, AnimeIcon, MovieIcon } from '@/components/icons';
+import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, ChineseIcon, ForeignIcon, JPKRIcon, AnimeIcon } from '@/components/icons';
 import styles from './page.module.css';
 
 const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { id: 'hk', icon: HKIcon },
-  { id: 'western', icon: WesternIcon },
+  { id: 'chinese', icon: ChineseIcon },
+  { id: 'foreign', icon: ForeignIcon },
   { id: 'jpkr', icon: JPKRIcon },
   { id: 'anime', icon: AnimeIcon },
-  { id: 'movie', icon: MovieIcon },
 ];
 
 function HomeContent() {
@@ -29,7 +28,7 @@ function HomeContent() {
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isRandomListCollapsed, setIsRandomListCollapsed] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('hk');
+  const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('chinese');
 
   useEffect(() => {
     const saved = loadPlaylist();
