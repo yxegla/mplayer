@@ -1,0 +1,271 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.backgroundImage {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.backgroundImage::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) saturate(1.5);
+  opacity: 0.4;
+  transform: scale(1.5);
+}
+
+.backgroundImage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 10, 15, 0.3) 0%, rgba(10, 10, 15, 0.9) 100%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  padding-top: calc(var(--safe-area-top) + var(--spacing-md));
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.closeButton:hover {
+  color: var(--color-text-primary);
+}
+
+.headerTitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.headerSpacer {
+  width: var(--tap-target-min);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.albumArt {
+  width: min(280px, 70vw);
+  aspect-ratio: 1;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  margin-bottom: var(--spacing-xl);
+  background: var(--color-bg-secondary);
+  position: relative;
+}
+
+.albumArt img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.albumArtPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
+}
+
+.albumArtPlaceholder svg {
+  width: 80px;
+  height: 80px;
+  color: white;
+  opacity: 0.6;
+}
+
+.songDetails {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  width: 100%;
+  max-width: 320px;
+}
+
+.songName {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.songArtist {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.lyricsContainer {
+  flex: 1;
+  width: 100%;
+  max-width: 320px;
+  overflow-y: auto;
+  mask-image: linear-gradient(transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, black 20%, black 80%, transparent);
+}
+
+.lyrics {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-2xl) 0;
+}
+
+.lyricLine {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  text-align: center;
+  transition: all var(--transition-base);
+  line-height: 1.6;
+}
+
+.lyricLine.active {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.noLyrics {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.controls {
+  width: 100%;
+  padding: var(--spacing-lg);
+  padding-bottom: calc(var(--safe-area-bottom) + var(--spacing-lg));
+}
+
+.progressContainer {
+  margin-bottom: var(--spacing-lg);
+}
+
+.progressBar {
+  position: relative;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--color-accent-gradient);
+  border-radius: var(--radius-full);
+  transition: width 0.1s linear;
+}
+
+.progressHandle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-fast);
+}
+
+.progressBar:active .progressHandle {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.timeDisplay {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.mainControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.controlButton:hover {
+  color: var(--color-text-primary);
+}
+
+.controlButton:active {
+  transform: scale(0.9);
+}
+
+.controlButton.active {
+  color: var(--color-accent-primary);
+}
+
+.playButton {
+  width: 72px;
+  height: 72px;
+  background: var(--color-accent-gradient);
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+.playButton svg {
+  color: white;
+}
+
+.playButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5);
+}
+
+.playButton:active {
+  transform: scale(0.95);
+}
