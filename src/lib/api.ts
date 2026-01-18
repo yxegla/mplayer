@@ -13,18 +13,33 @@ const PLAYLIST_IDS: Record<Exclude<PlaylistCategory, 'all'>, string> = {
 
 const STORAGE_KEY = 'mplayer_random_playlist';
 const CATEGORY_KEY = 'mplayer_selected_category';
+const PLAYING_INDEX_KEY = 'mplayer_playing_index';
 
-export function savePlaylist(songs: Song[], category: PlaylistCategory): void {
+export function savePlaylist(songs: Song[], category: PlaylistCategory, playingIndex?: number): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ songs, category, timestamp: Date.now() }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+      songs, 
+      category, 
+      playingIndex: playingIndex ?? 0,
+      timestamp: Date.now() 
+    }));
   } catch {}
 }
 
-export function loadPlaylist(): { songs: Song[]; category: PlaylistCategory } | null {
+export function savePlayingIndex(index: number): void {
+  try {
+    localStorage.setItem(PLAYING_INDEX_KEY, String(index));
+  } catch {}
+}
+
+export function loadPlaylist(): { songs: Song[]; category: PlaylistCategory; playingIndex: number } | null {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return null;
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    const indexStr = localStorage.getItem(PLAYING_INDEX_KEY);
+    const playingIndex = indexStr ? parseInt(indexStr, 10) : (parsed.playingIndex ?? 0);
+    return { ...parsed, playingIndex };
   } catch {
     return null;
   }

@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 import { usePlayer } from '@/hooks/usePlayer';
-import { aggregateSearch, getToplist, shuffleArray, savePlaylist, loadPlaylist } from '@/lib/api';
+import { aggregateSearch, getToplist, shuffleArray, savePlaylist, loadPlaylist, savePlayingIndex } from '@/lib/api';
 import type { PlaylistCategory } from '@/lib/api';
 import type { Song } from '@/types/music';
 import SearchBar from '@/components/SearchBar';
 import SongList from '@/components/SongList';
 import MiniPlayer from '@/components/MiniPlayer';
 import NowPlaying from '@/components/NowPlaying';
-import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, ChineseIcon, ForeignIcon, JPKRIcon, AnimeIcon } from '@/components/icons';
+import { LogoIcon, ShuffleIcon, SpinnerIcon, RefreshIcon, ChineseIcon, ForeignIcon, JPKRIcon, AnimeIcon } from '@/components/icons';
 import styles from './page.module.css';
 
 const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
@@ -20,14 +21,13 @@ const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: num
 ];
 
 function HomeContent() {
-  const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue } = usePlayer();
+  const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue, currentSong } = usePlayer();
   const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isRandomListCollapsed, setIsRandomListCollapsed] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('chinese');
 
   useEffect(() => {
@@ -36,11 +36,18 @@ function HomeContent() {
       setSongs(saved.songs);
       setSelectedCategory(saved.category);
       setHasSearched(true);
+      setRandomMode(true);
+      if (saved.songs.length > 0) {
+        const idx = Math.min(saved.playingIndex, saved.songs.length - 1);
+        playQueue(saved.songs, idx);
+      }
     }
-  }, []);
+  }, [setRandomMode, playQueue]);
 
   useEffect(() => {
     if (!isRandomMode || queue.length === 0) return;
+    
+    savePlayingIndex(queueIndex);
     
     const remainingSongs = queue.length - queueIndex - 1;
     if (remainingSongs <= 2) {
@@ -77,7 +84,6 @@ function HomeContent() {
       setSongs(shuffled);
       setHasSearched(true);
       setRandomMode(true);
-      setIsRandomListCollapsed(true);
       setSelectedCategory(cat);
       savePlaylist(shuffled, cat);
       playQueue(shuffled, 0);
@@ -93,9 +99,9 @@ function HomeContent() {
     handleRandomPlay(category);
   }, [handleRandomPlay]);
 
-  const toggleRandomListCollapse = useCallback(() => {
-    setIsRandomListCollapsed(prev => !prev);
-  }, []);
+  const coverUrl = currentSong 
+    ? `/api/music/cover?id=${currentSong.id}&platform=${currentSong.platform}`
+    : null;
 
   return (
     <>
@@ -141,24 +147,6 @@ function HomeContent() {
         </div>
 
         <section className={styles.songListSection}>
-          {hasSearched && (
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                <ListIcon size={20} />
-              </h2>
-              {isRandomMode && songs.length > 0 && (
-                <button
-                  type="button"
-                  className={styles.collapseButton}
-                  onClick={toggleRandomListCollapse}
-                  aria-label={isRandomListCollapsed ? '展开列表' : '折叠列表'}
-                >
-                  {isRandomListCollapsed ? <ChevronDownIcon size={20} /> : <ChevronUpIcon size={20} />}
-                </button>
-              )}
-            </div>
-          )}
-          
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <SpinnerIcon size={32} />
@@ -169,8 +157,25 @@ function HomeContent() {
                 <RefreshIcon size={24} />
               </button>
             </div>
+          ) : isRandomMode && currentSong && coverUrl ? (
+            <div className={styles.coverDisplay}>
+              <div className={styles.coverWrapper}>
+                <Image
+                  src={coverUrl}
+                  alt={currentSong.name}
+                  fill
+                  className={styles.coverImage}
+                  priority
+                  unoptimized
+                />
+              </div>
+              <div className={styles.coverInfo}>
+                <h2 className={styles.coverTitle}>{currentSong.name}</h2>
+                <p className={styles.coverArtist}>{currentSong.artist}</p>
+              </div>
+            </div>
           ) : (
-            (!isRandomMode || !isRandomListCollapsed) && <SongList songs={songs} />
+            hasSearched && <SongList songs={songs} />
           )}
         </section>
       </div>
