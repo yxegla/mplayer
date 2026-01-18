@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { usePlayer } from '@/hooks/usePlayer';
+import { useColorThief } from '@/hooks/useColorThief';
 import { aggregateSearch, getToplist, shuffleArray, savePlaylist, loadPlaylist, savePlayingIndex } from '@/lib/api';
 import type { PlaylistCategory } from '@/lib/api';
 import type { Song } from '@/types/music';
@@ -103,10 +104,16 @@ function HomeContent() {
   const coverUrl = displaySong 
     ? `/api/music/cover?id=${displaySong.id}&platform=${displaySong.platform}`
     : null;
+  
+  const dominantColor = useColorThief(coverUrl);
+  
+  const containerStyle = dominantColor ? {
+    background: `linear-gradient(180deg, rgba(${dominantColor}, 0.3) 0%, rgba(${dominantColor}, 0.1) 30%, var(--color-bg-primary) 60%)`,
+  } : undefined;
 
   return (
     <>
-      <div className={styles.container}>
+      <div className={styles.container} style={containerStyle}>
         <header className={styles.header}>
           <div className={styles.logo}>
             <div className={styles.logoIcon}>

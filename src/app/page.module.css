@@ -5,6 +5,7 @@
   padding: var(--spacing-md);
   padding-top: calc(var(--safe-area-top) + var(--spacing-md));
   padding-bottom: calc(var(--mini-player-height) + var(--safe-area-bottom) + var(--spacing-md));
+  transition: background 0.8s ease;
 }
 
 .header {
