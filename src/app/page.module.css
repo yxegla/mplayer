@@ -50,9 +50,64 @@
 }
 
 .actions {
+  display: none;
+}
+
+.categorySection {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   margin-bottom: var(--spacing-lg);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-xs);
+  -webkit-overflow-scrolling: touch;
+}
+
+.categorySection::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: var(--spacing-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+
+.categoryButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-primary);
+}
+
+.categoryButton:active {
+  transform: scale(0.95);
+}
+
+.categoryButton.active {
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: white;
+}
+
+.categoryButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.shuffleButton {
+  margin-left: auto;
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: white;
 }
 
 .actionButton {

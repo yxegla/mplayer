@@ -2,14 +2,23 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { usePlayer } from '@/hooks/usePlayer';
-import { aggregateSearch, getToplist, shuffleArray } from '@/lib/api';
+import { aggregateSearch, getToplist, shuffleArray, savePlaylist, loadPlaylist } from '@/lib/api';
+import type { PlaylistCategory } from '@/lib/api';
 import type { Song } from '@/types/music';
 import SearchBar from '@/components/SearchBar';
 import SongList from '@/components/SongList';
 import MiniPlayer from '@/components/MiniPlayer';
 import NowPlaying from '@/components/NowPlaying';
-import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
+import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon, HKIcon, WesternIcon, JPKRIcon, AnimeIcon, MovieIcon } from '@/components/icons';
 import styles from './page.module.css';
+
+const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { id: 'hk', icon: HKIcon },
+  { id: 'western', icon: WesternIcon },
+  { id: 'jpkr', icon: JPKRIcon },
+  { id: 'anime', icon: AnimeIcon },
+  { id: 'movie', icon: MovieIcon },
+];
 
 function HomeContent() {
   const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue } = usePlayer();
@@ -20,17 +29,27 @@ function HomeContent() {
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isRandomListCollapsed, setIsRandomListCollapsed] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('hk');
+
+  useEffect(() => {
+    const saved = loadPlaylist();
+    if (saved) {
+      setSongs(saved.songs);
+      setSelectedCategory(saved.category);
+      setHasSearched(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isRandomMode || queue.length === 0) return;
     
     const remainingSongs = queue.length - queueIndex - 1;
     if (remainingSongs <= 2) {
-      getToplist('netease').then(topSongs => {
+      getToplist('netease', selectedCategory).then(topSongs => {
         appendToQueue(topSongs);
       }).catch(() => {});
     }
-  }, [queueIndex, queue.length, isRandomMode, appendToQueue]);
+  }, [queueIndex, queue.length, isRandomMode, appendToQueue, selectedCategory]);
 
   const handleSearch = useCallback(async (keyword: string) => {
     setIsLoading(true);
@@ -48,24 +67,32 @@ function HomeContent() {
     }
   }, [setRandomMode]);
 
-  const handleRandomPlay = useCallback(async () => {
+  const handleRandomPlay = useCallback(async (category?: PlaylistCategory) => {
+    const cat = category || selectedCategory;
     setIsLoadingRandom(true);
     setError(null);
     
     try {
-      const topSongs = await getToplist('netease');
+      const topSongs = await getToplist('netease', cat);
       const shuffled = shuffleArray(topSongs);
       setSongs(shuffled);
       setHasSearched(true);
       setRandomMode(true);
       setIsRandomListCollapsed(true);
+      setSelectedCategory(cat);
+      savePlaylist(shuffled, cat);
       playQueue(shuffled, 0);
     } catch {
       setError('获取歌曲失败，请重试');
     } finally {
       setIsLoadingRandom(false);
     }
-  }, [setRandomMode, playQueue]);
+  }, [setRandomMode, playQueue, selectedCategory]);
+
+  const handleCategoryClick = useCallback((category: PlaylistCategory) => {
+    setSelectedCategory(category);
+    handleRandomPlay(category);
+  }, [handleRandomPlay]);
 
   const toggleRandomListCollapse = useCallback(() => {
     setIsRandomListCollapsed(prev => !prev);
@@ -86,11 +113,23 @@ function HomeContent() {
           <SearchBar onSearch={handleSearch} isLoading={isLoading} />
         </section>
 
-        <div className={styles.actions}>
+        <div className={styles.categorySection}>
+          {CATEGORIES.map(({ id, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              className={`${styles.categoryButton} ${selectedCategory === id ? styles.active : ''}`}
+              onClick={() => handleCategoryClick(id)}
+              disabled={isLoadingRandom}
+              aria-label={id}
+            >
+              <Icon size={20} />
+            </button>
+          ))}
           <button 
             type="button"
-            className={`${styles.actionButton} ${styles.primary}`}
-            onClick={handleRandomPlay}
+            className={`${styles.categoryButton} ${styles.shuffleButton}`}
+            onClick={() => handleRandomPlay()}
             disabled={isLoadingRandom}
             aria-label="随机播放"
           >

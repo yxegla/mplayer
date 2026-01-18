@@ -1,6 +1,34 @@
-import { Song, SearchResult, LyricLine, Platform } from '@/types/music';
+import type { Song, SearchResult, LyricLine, Platform } from '@/types/music';
 
 const API_BASE = '/api/music';
+
+export type PlaylistCategory = 'hk' | 'western' | 'jpkr' | 'anime' | 'movie';
+
+const PLAYLIST_IDS: Record<PlaylistCategory, string> = {
+  hk: '214532560',
+  western: '3778678',
+  jpkr: '60198',
+  anime: '71385702',
+  movie: '71385787',
+};
+
+const STORAGE_KEY = 'mplayer_random_playlist';
+
+export function savePlaylist(songs: Song[], category: PlaylistCategory): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ songs, category, timestamp: Date.now() }));
+  } catch {}
+}
+
+export function loadPlaylist(): { songs: Song[]; category: PlaylistCategory } | null {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
 
 export async function searchSongs(keyword: string, platform: Platform = 'netease'): Promise<SearchResult> {
   const res = await fetch(`${API_BASE}/search?keyword=${encodeURIComponent(keyword)}&platform=${platform}`);
@@ -32,11 +60,12 @@ export async function getSongCover(song: Song): Promise<string> {
   return `${API_BASE}/cover?id=${song.id}&platform=${song.platform}`;
 }
 
-export async function getToplist(platform: Platform = 'netease'): Promise<Song[]> {
-  const res = await fetch(`${API_BASE}/toplist?platform=${platform}`);
+export async function getToplist(platform: Platform = 'netease', category?: PlaylistCategory): Promise<Song[]> {
+  const listId = category ? PLAYLIST_IDS[category] : '19723756';
+  const res = await fetch(`${API_BASE}/toplist?platform=${platform}&id=${listId}`);
   if (!res.ok) throw new Error('Failed to get toplist');
   const data = await res.json();
-  return data.songs;
+  return data.songs.slice(0, 20);
 }
 
 export function shuffleArray<T>(array: T[]): T[] {
