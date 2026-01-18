@@ -108,7 +108,7 @@ function HomeContent() {
   const dominantColor = useColorThief(coverUrl);
   
   const containerStyle = dominantColor ? {
-    background: `linear-gradient(180deg, rgba(${dominantColor}, 0.3) 0%, rgba(${dominantColor}, 0.1) 30%, var(--color-bg-primary) 60%)`,
+    background: `linear-gradient(180deg, rgba(${dominantColor}, 0.6) 0%, rgba(${dominantColor}, 0.3) 40%, var(--color-bg-primary) 100%)`,
   } : undefined;
 
   return (
