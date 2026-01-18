@@ -79,19 +79,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       navigator.mediaSession.setActionHandler('pause', () => {
         audio.pause();
       });
-      navigator.mediaSession.setActionHandler('previoustrack', () => {
-        prevSongRef.current();
-      });
-      navigator.mediaSession.setActionHandler('nexttrack', () => {
-        nextSongInternalRef.current();
-      });
-      navigator.mediaSession.setActionHandler('seekbackward', null);
-      navigator.mediaSession.setActionHandler('seekforward', null);
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
-        if (details.seekTime !== undefined) {
-          audio.currentTime = details.seekTime;
-        }
-      });
     }
 
     return () => {
@@ -131,20 +118,35 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) return;
     
     try {
-      const url = await getSongUrl(song);
-      audioRef.current.src = url;
-      await audioRef.current.play();
-      setCurrentSong(song);
-      
-      const songLyrics = await getSongLyrics(song);
-      setLyrics(songLyrics);
-
       if ('mediaSession' in navigator) {
+        const actions: MediaSessionAction[] = [
+          'play', 'pause', 'previoustrack', 'nexttrack',
+          'seekbackward', 'seekforward', 'seekto'
+        ];
+        actions.forEach(action => {
+          try {
+            navigator.mediaSession.setActionHandler(action, null);
+          } catch {}
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => {
+          audioRef.current?.play();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          audioRef.current?.pause();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          prevSongRef.current();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          nextSongInternalRef.current();
+        });
+
         const coverUrl = `${window.location.origin}/api/music/cover?id=${song.id}&platform=${song.platform}`;
         navigator.mediaSession.metadata = new MediaMetadata({
           title: song.name,
           artist: song.artist,
-          album: song.album || '',
+          album: song.album || song.name,
           artwork: [
             { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
             { src: coverUrl, sizes: '128x128', type: 'image/jpeg' },
@@ -155,6 +157,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           ],
         });
       }
+
+      const url = await getSongUrl(song);
+      audioRef.current.src = url;
+      await audioRef.current.play();
+      setCurrentSong(song);
+
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing';
+      }
+      
+      const songLyrics = await getSongLyrics(song);
+      setLyrics(songLyrics);
     } catch (error) {
       console.error('Failed to play song:', error);
     }
