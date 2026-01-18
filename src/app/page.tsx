@@ -99,8 +99,9 @@ function HomeContent() {
     handleRandomPlay(category);
   }, [handleRandomPlay]);
 
-  const coverUrl = currentSong 
-    ? `/api/music/cover?id=${currentSong.id}&platform=${currentSong.platform}`
+  const displaySong = currentSong || (isRandomMode && queue.length > 0 ? queue[queueIndex] : null);
+  const coverUrl = displaySong 
+    ? `/api/music/cover?id=${displaySong.id}&platform=${displaySong.platform}`
     : null;
 
   return (
@@ -158,12 +159,12 @@ function HomeContent() {
               </button>
             </div>
           ) : isRandomMode ? (
-            currentSong && coverUrl ? (
+            displaySong && coverUrl ? (
               <div className={styles.coverDisplay}>
                 <div className={styles.coverWrapper}>
                   <Image
                     src={coverUrl}
-                    alt={currentSong.name}
+                    alt={displaySong.name}
                     fill
                     className={styles.coverImage}
                     priority
@@ -171,8 +172,8 @@ function HomeContent() {
                   />
                 </div>
                 <div className={styles.coverInfo}>
-                  <h2 className={styles.coverTitle}>{currentSong.name}</h2>
-                  <p className={styles.coverArtist}>{currentSong.artist}</p>
+                  <h2 className={styles.coverTitle}>{displaySong.name}</h2>
+                  <p className={styles.coverArtist}>{displaySong.artist}</p>
                 </div>
               </div>
             ) : (
