@@ -21,7 +21,7 @@ const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: num
 ];
 
 function HomeContent() {
-  const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue, currentSong } = usePlayer();
+  const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue, restoreQueue, currentSong } = usePlayer();
   const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
@@ -39,10 +39,10 @@ function HomeContent() {
       setRandomMode(true);
       if (saved.songs.length > 0) {
         const idx = Math.min(saved.playingIndex, saved.songs.length - 1);
-        playQueue(saved.songs, idx);
+        restoreQueue(saved.songs, idx);
       }
     }
-  }, [setRandomMode, playQueue]);
+  }, [setRandomMode, restoreQueue]);
 
   useEffect(() => {
     if (!isRandomMode || queue.length === 0) return;

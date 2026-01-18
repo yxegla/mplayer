@@ -17,6 +17,7 @@ interface PlayerContextType {
   isRandomMode: boolean;
   playSong: (song: Song) => void;
   playQueue: (songs: Song[], startIndex?: number) => void;
+  restoreQueue: (songs: Song[], startIndex?: number) => void;
   togglePlay: () => void;
   nextSong: () => void;
   prevSong: () => void;
@@ -211,6 +212,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     loadAndPlay(songsToPlay[startIndex]);
   }, [shuffle, loadAndPlay]);
 
+  const restoreQueue = useCallback((songs: Song[], startIndex = 0) => {
+    setQueue(songs);
+    setQueueIndex(startIndex);
+    setCurrentSong(songs[startIndex]);
+  }, []);
+
   const togglePlay = useCallback(() => {
     if (!audioRef.current) return;
     
@@ -284,6 +291,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         isRandomMode,
         playSong,
         playQueue,
+        restoreQueue,
         togglePlay,
         nextSong,
         prevSong,
