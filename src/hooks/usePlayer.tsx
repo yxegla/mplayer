@@ -223,10 +223,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     
     if (isPlaying) {
       audioRef.current.pause();
-    } else {
+    } else if (audioRef.current.src) {
       audioRef.current.play();
+    } else if (currentSong) {
+      loadAndPlay(currentSong);
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentSong, loadAndPlay]);
 
   const nextSong = useCallback(() => {
     nextSongInternal();
