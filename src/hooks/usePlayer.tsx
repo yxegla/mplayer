@@ -51,6 +51,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isRandomMode, setIsRandomMode] = useState(false);
 
   const nextSongInternalRef = useRef<() => void>(() => {});
+  const prevSongRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     audioRef.current = new Audio();
@@ -70,6 +71,26 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     audio.addEventListener('play', () => setIsPlaying(true));
     audio.addEventListener('pause', () => setIsPlaying(false));
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => {
+        audio.play();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        audio.pause();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        prevSongRef.current();
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        nextSongInternalRef.current();
+      });
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime !== undefined) {
+          audio.currentTime = details.seekTime;
+        }
+      });
+    }
 
     return () => {
       audio.pause();
@@ -94,6 +115,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setCurrentLyricIndex(index);
   }, [currentTime, lyrics]);
 
+  useEffect(() => {
+    if ('mediaSession' in navigator && duration > 0) {
+      navigator.mediaSession.setPositionState({
+        duration: duration,
+        playbackRate: 1,
+        position: Math.min(currentTime, duration),
+      });
+    }
+  }, [currentTime, duration]);
+
   const loadAndPlay = useCallback(async (song: Song) => {
     if (!audioRef.current) return;
     
@@ -105,6 +136,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       
       const songLyrics = await getSongLyrics(song);
       setLyrics(songLyrics);
+
+      if ('mediaSession' in navigator) {
+        const coverUrl = `${window.location.origin}/api/music/cover?id=${song.id}&platform=${song.platform}`;
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.name,
+          artist: song.artist,
+          album: song.album || '',
+          artwork: [
+            { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
+            { src: coverUrl, sizes: '128x128', type: 'image/jpeg' },
+            { src: coverUrl, sizes: '192x192', type: 'image/jpeg' },
+            { src: coverUrl, sizes: '256x256', type: 'image/jpeg' },
+            { src: coverUrl, sizes: '384x384', type: 'image/jpeg' },
+            { src: coverUrl, sizes: '512x512', type: 'image/jpeg' },
+          ],
+        });
+      }
     } catch (error) {
       console.error('Failed to play song:', error);
     }
@@ -167,6 +215,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setQueueIndex(prevIndex);
     loadAndPlay(queue[prevIndex]);
   }, [queue, queueIndex, currentTime, loadAndPlay]);
+
+  useEffect(() => {
+    prevSongRef.current = prevSong;
+  }, [prevSong]);
 
   const seek = useCallback((time: number) => {
     if (!audioRef.current) return;
