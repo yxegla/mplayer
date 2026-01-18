@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePlayer } from '@/hooks/usePlayer';
+import { MusicNoteIcon, MicOffIcon } from '@/components/icons';
 import styles from './NowPlaying.module.css';
 
 interface NowPlayingProps {
@@ -67,7 +68,9 @@ export default function NowPlaying({ onClose }: NowPlayingProps) {
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className={styles.headerTitle}>正在播放</span>
+        <span className={styles.headerTitle}>
+          <MusicNoteIcon size={20} className={styles.nowPlayingIcon} />
+        </span>
         <div className={styles.headerSpacer} />
       </header>
 
@@ -108,7 +111,9 @@ export default function NowPlaying({ onClose }: NowPlayingProps) {
               ))}
             </div>
           ) : (
-            <div className={styles.noLyrics}>暂无歌词</div>
+            <div className={styles.noLyrics}>
+              <MicOffIcon size={32} />
+            </div>
           )}
         </div>
       </div>

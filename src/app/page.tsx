@@ -1,27 +1,42 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { PlayerProvider } from '@/hooks/usePlayer';
+import { useState, useCallback, useEffect } from 'react';
+import { usePlayer } from '@/hooks/usePlayer';
 import { aggregateSearch, getToplist, shuffleArray } from '@/lib/api';
-import { Song } from '@/types/music';
+import type { Song } from '@/types/music';
 import SearchBar from '@/components/SearchBar';
 import SongList from '@/components/SongList';
 import MiniPlayer from '@/components/MiniPlayer';
 import NowPlaying from '@/components/NowPlaying';
+import { LogoIcon, ShuffleIcon, ListIcon, SpinnerIcon, RefreshIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
 import styles from './page.module.css';
 
 function HomeContent() {
+  const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue } = usePlayer();
   const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isRandomListCollapsed, setIsRandomListCollapsed] = useState(true);
+
+  useEffect(() => {
+    if (!isRandomMode || queue.length === 0) return;
+    
+    const remainingSongs = queue.length - queueIndex - 1;
+    if (remainingSongs <= 2) {
+      getToplist('netease').then(topSongs => {
+        appendToQueue(topSongs);
+      }).catch(() => {});
+    }
+  }, [queueIndex, queue.length, isRandomMode, appendToQueue]);
 
   const handleSearch = useCallback(async (keyword: string) => {
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
+    setRandomMode(false);
     
     try {
       const result = await aggregateSearch(keyword);
@@ -31,7 +46,7 @@ function HomeContent() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setRandomMode]);
 
   const handleRandomPlay = useCallback(async () => {
     setIsLoadingRandom(true);
@@ -42,11 +57,18 @@ function HomeContent() {
       const shuffled = shuffleArray(topSongs);
       setSongs(shuffled);
       setHasSearched(true);
+      setRandomMode(true);
+      setIsRandomListCollapsed(true);
+      playQueue(shuffled, 0);
     } catch {
       setError('获取歌曲失败，请重试');
     } finally {
       setIsLoadingRandom(false);
     }
+  }, [setRandomMode, playQueue]);
+
+  const toggleRandomListCollapse = useCallback(() => {
+    setIsRandomListCollapsed(prev => !prev);
   }, []);
 
   return (
@@ -55,14 +77,8 @@ function HomeContent() {
         <header className={styles.header}>
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="MPlayer">
-                <title>MPlayer</title>
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </svg>
+              <LogoIcon size={28} />
             </div>
-            <span className={styles.logoText}>MPlayer</span>
           </div>
         </header>
 
@@ -76,35 +92,47 @@ function HomeContent() {
             className={`${styles.actionButton} ${styles.primary}`}
             onClick={handleRandomPlay}
             disabled={isLoadingRandom}
+            aria-label="随机播放"
           >
             {isLoadingRandom ? (
-              <div className="spinner" style={{ width: 20, height: 20 }} />
+              <SpinnerIcon size={20} />
             ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-hidden="true">
-                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-              </svg>
+              <ShuffleIcon size={20} />
             )}
-            随机播放
           </button>
         </div>
 
         <section className={styles.songListSection}>
-          {hasSearched && <h2 className={styles.sectionTitle}>搜索结果</h2>}
+          {hasSearched && (
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <ListIcon size={20} />
+              </h2>
+              {isRandomMode && songs.length > 0 && (
+                <button
+                  type="button"
+                  className={styles.collapseButton}
+                  onClick={toggleRandomListCollapse}
+                  aria-label={isRandomListCollapsed ? '展开列表' : '折叠列表'}
+                >
+                  {isRandomListCollapsed ? <ChevronDownIcon size={20} /> : <ChevronUpIcon size={20} />}
+                </button>
+              )}
+            </div>
+          )}
           
           {isLoading ? (
             <div className={styles.loadingContainer}>
-              <div className="spinner" />
-              <p>搜索中...</p>
+              <SpinnerIcon size={32} />
             </div>
           ) : error ? (
             <div className={styles.errorContainer}>
-              <p>{error}</p>
-              <button type="button" className={styles.retryButton} onClick={() => handleRandomPlay()}>
-                重试
+              <button type="button" className={styles.retryButton} onClick={() => handleRandomPlay()} aria-label="重试">
+                <RefreshIcon size={24} />
               </button>
             </div>
           ) : (
-            <SongList songs={songs} />
+            (!isRandomMode || !isRandomListCollapsed) && <SongList songs={songs} />
           )}
         </section>
       </div>
@@ -120,8 +148,6 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <PlayerProvider>
-      <HomeContent />
-    </PlayerProvider>
+    <HomeContent />
   );
 }

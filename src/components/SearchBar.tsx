@@ -34,7 +34,6 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         <input
           type="text"
           className={styles.input}
-          placeholder="搜索歌曲、歌手..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           autoComplete="off"

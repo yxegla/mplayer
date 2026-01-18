@@ -7,12 +7,14 @@ import { getSongUrl, getSongLyrics, shuffleArray } from '@/lib/api';
 interface PlayerContextType {
   currentSong: Song | null;
   queue: Song[];
+  queueIndex: number;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
   shuffle: boolean;
   lyrics: LyricLine[];
   currentLyricIndex: number;
+  isRandomMode: boolean;
   playSong: (song: Song) => void;
   playQueue: (songs: Song[], startIndex?: number) => void;
   togglePlay: () => void;
@@ -21,6 +23,8 @@ interface PlayerContextType {
   seek: (time: number) => void;
   toggleShuffle: () => void;
   setVolume: (volume: number) => void;
+  setRandomMode: (enabled: boolean) => void;
+  appendToQueue: (songs: Song[]) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -44,6 +48,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [shuffle, setShuffle] = useState(false);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [currentLyricIndex, setCurrentLyricIndex] = useState(-1);
+  const [isRandomMode, setIsRandomMode] = useState(false);
 
   const nextSongInternalRef = useRef<() => void>(() => {});
 
@@ -178,17 +183,31 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     audioRef.current.volume = Math.max(0, Math.min(1, volume));
   }, []);
 
+  const setRandomModeValue = useCallback((enabled: boolean) => {
+    setIsRandomMode(enabled);
+  }, []);
+
+  const appendToQueue = useCallback((songs: Song[]) => {
+    const existingIds = new Set(queue.map(s => `${s.platform}-${s.id}`));
+    const newSongs = songs.filter(s => !existingIds.has(`${s.platform}-${s.id}`));
+    if (newSongs.length > 0) {
+      setQueue(prev => [...prev, ...shuffleArray(newSongs)]);
+    }
+  }, [queue]);
+
   return (
     <PlayerContext.Provider
       value={{
         currentSong,
         queue,
+        queueIndex,
         isPlaying,
         currentTime,
         duration,
         shuffle,
         lyrics,
         currentLyricIndex,
+        isRandomMode,
         playSong,
         playQueue,
         togglePlay,
@@ -197,6 +216,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         seek,
         toggleShuffle,
         setVolume,
+        setRandomMode: setRandomModeValue,
+        appendToQueue,
       }}
     >
       {children}

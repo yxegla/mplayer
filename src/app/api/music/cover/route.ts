@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE = 'https://music-dl.sayqz.com';
+const API_BASE = process.env.MUSIC_API_BASE;
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

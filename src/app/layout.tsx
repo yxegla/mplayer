@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { PlayerProvider } from "@/hooks/usePlayer";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -32,7 +33,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
-        {children}
+        <PlayerProvider>
+          {children}
+        </PlayerProvider>
       </body>
     </html>
   );

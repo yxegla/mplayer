@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE = 'https://music-dl.sayqz.com';
+const API_BASE = process.env.MUSIC_API_BASE;
 
 interface LyricLine {
   time: number;
