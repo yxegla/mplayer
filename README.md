@@ -69,8 +69,7 @@ src/
 
 1.  Clone the repository:
     ```bash
-    # IMPORTANT: Replace 'your-username' with the actual repository owner
-    git clone https://github.com/your-username/mplayer.git
+    git clone https://github.com/yxegla/mplayer.git
     cd mplayer
     ```
 
