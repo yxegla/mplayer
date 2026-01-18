@@ -141,12 +141,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         navigator.mediaSession.setActionHandler('nexttrack', () => {
           nextSongInternalRef.current();
         });
-        navigator.mediaSession.setActionHandler('seekbackward', () => {
-          prevSongRef.current();
-        });
-        navigator.mediaSession.setActionHandler('seekforward', () => {
-          nextSongInternalRef.current();
-        });
 
         const coverUrl = `${window.location.origin}/api/music/cover?id=${song.id}&platform=${song.platform}`;
         navigator.mediaSession.metadata = new MediaMetadata({
