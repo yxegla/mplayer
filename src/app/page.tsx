@@ -157,23 +157,29 @@ function HomeContent() {
                 <RefreshIcon size={24} />
               </button>
             </div>
-          ) : isRandomMode && currentSong && coverUrl ? (
-            <div className={styles.coverDisplay}>
-              <div className={styles.coverWrapper}>
-                <Image
-                  src={coverUrl}
-                  alt={currentSong.name}
-                  fill
-                  className={styles.coverImage}
-                  priority
-                  unoptimized
-                />
+          ) : isRandomMode ? (
+            currentSong && coverUrl ? (
+              <div className={styles.coverDisplay}>
+                <div className={styles.coverWrapper}>
+                  <Image
+                    src={coverUrl}
+                    alt={currentSong.name}
+                    fill
+                    className={styles.coverImage}
+                    priority
+                    unoptimized
+                  />
+                </div>
+                <div className={styles.coverInfo}>
+                  <h2 className={styles.coverTitle}>{currentSong.name}</h2>
+                  <p className={styles.coverArtist}>{currentSong.artist}</p>
+                </div>
               </div>
-              <div className={styles.coverInfo}>
-                <h2 className={styles.coverTitle}>{currentSong.name}</h2>
-                <p className={styles.coverArtist}>{currentSong.artist}</p>
+            ) : (
+              <div className={styles.loadingContainer}>
+                <SpinnerIcon size={32} />
               </div>
-            </div>
+            )
           ) : (
             hasSearched && <SongList songs={songs} />
           )}
