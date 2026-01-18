@@ -206,6 +206,17 @@
   color: var(--color-text-muted);
 }
 
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--spacing-2xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
 .errorContainer {
   display: flex;
   flex-direction: column;

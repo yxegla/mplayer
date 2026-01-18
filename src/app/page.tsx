@@ -4,17 +4,15 @@ import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { usePlayer } from '@/hooks/usePlayer';
 import { useColorThief } from '@/hooks/useColorThief';
-import { aggregateSearch, getToplist, shuffleArray, savePlaylist, loadPlaylist, savePlayingIndex } from '@/lib/api';
+import { getToplist, shuffleArray, savePlaylist, loadPlaylist, savePlayingIndex } from '@/lib/api';
 import type { PlaylistCategory } from '@/lib/api';
-import type { Song } from '@/types/music';
-import SearchBar from '@/components/SearchBar';
-import SongList from '@/components/SongList';
 import MiniPlayer from '@/components/MiniPlayer';
 import NowPlaying from '@/components/NowPlaying';
-import { LogoIcon, ShuffleIcon, SpinnerIcon, RefreshIcon, ChineseIcon, ForeignIcon, JPKRIcon, AnimeIcon } from '@/components/icons';
+import { LogoIcon, ShuffleIcon, SpinnerIcon, RefreshIcon, ChineseIcon, ForeignIcon, JPKRIcon, AnimeIcon, AllIcon } from '@/components/icons';
 import styles from './page.module.css';
 
 const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { id: 'all', icon: AllIcon },
   { id: 'chinese', icon: ChineseIcon },
   { id: 'foreign', icon: ForeignIcon },
   { id: 'jpkr', icon: JPKRIcon },
@@ -23,20 +21,15 @@ const CATEGORIES: { id: PlaylistCategory; icon: React.ComponentType<{ size?: num
 
 function HomeContent() {
   const { queueIndex, queue, isRandomMode, setRandomMode, appendToQueue, playQueue, restoreQueue, currentSong } = usePlayer();
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showNowPlaying, setShowNowPlaying] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('chinese');
+  const [selectedCategory, setSelectedCategory] = useState<PlaylistCategory>('all');
 
   useEffect(() => {
     const saved = loadPlaylist();
     if (saved) {
-      setSongs(saved.songs);
       setSelectedCategory(saved.category);
-      setHasSearched(true);
       setRandomMode(true);
       if (saved.songs.length > 0) {
         const idx = Math.min(saved.playingIndex, saved.songs.length - 1);
@@ -58,22 +51,6 @@ function HomeContent() {
     }
   }, [queueIndex, queue.length, isRandomMode, appendToQueue, selectedCategory]);
 
-  const handleSearch = useCallback(async (keyword: string) => {
-    setIsLoading(true);
-    setError(null);
-    setHasSearched(true);
-    setRandomMode(false);
-    
-    try {
-      const result = await aggregateSearch(keyword);
-      setSongs(result.songs);
-    } catch {
-      setError('搜索失败，请重试');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [setRandomMode]);
-
   const handleRandomPlay = useCallback(async (category?: PlaylistCategory) => {
     const cat = category || selectedCategory;
     setIsLoadingRandom(true);
@@ -82,8 +59,6 @@ function HomeContent() {
     try {
       const topSongs = await getToplist('netease', cat);
       const shuffled = shuffleArray(topSongs);
-      setSongs(shuffled);
-      setHasSearched(true);
       setRandomMode(true);
       setSelectedCategory(cat);
       savePlaylist(shuffled, cat);
@@ -122,10 +97,6 @@ function HomeContent() {
           </div>
         </header>
 
-        <section className={styles.searchSection}>
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
-        </section>
-
         <div className={styles.categorySection}>
           {CATEGORIES.map(({ id, icon: Icon }) => (
             <button
@@ -155,41 +126,33 @@ function HomeContent() {
         </div>
 
         <section className={styles.songListSection}>
-          {isLoading ? (
-            <div className={styles.loadingContainer}>
-              <SpinnerIcon size={32} />
-            </div>
-          ) : error ? (
+          {error ? (
             <div className={styles.errorContainer}>
               <button type="button" className={styles.retryButton} onClick={() => handleRandomPlay()} aria-label="重试">
                 <RefreshIcon size={24} />
               </button>
             </div>
-          ) : isRandomMode ? (
-            displaySong && coverUrl ? (
-              <div className={styles.coverDisplay}>
-                <div className={styles.coverWrapper}>
-                  <Image
-                    src={coverUrl}
-                    alt={displaySong.name}
-                    fill
-                    className={styles.coverImage}
-                    priority
-                    unoptimized
-                  />
-                </div>
-                <div className={styles.coverInfo}>
-                  <h2 className={styles.coverTitle}>{displaySong.name}</h2>
-                  <p className={styles.coverArtist}>{displaySong.artist}</p>
-                </div>
+          ) : displaySong && coverUrl ? (
+            <div className={styles.coverDisplay}>
+              <div className={styles.coverWrapper}>
+                <Image
+                  src={coverUrl}
+                  alt={displaySong.name}
+                  fill
+                  className={styles.coverImage}
+                  priority
+                  unoptimized
+                />
               </div>
-            ) : (
-              <div className={styles.loadingContainer}>
-                <SpinnerIcon size={32} />
+              <div className={styles.coverInfo}>
+                <h2 className={styles.coverTitle}>{displaySong.name}</h2>
+                <p className={styles.coverArtist}>{displaySong.artist}</p>
               </div>
-            )
+            </div>
           ) : (
-            hasSearched && <SongList songs={songs} />
+            <div className={styles.emptyState}>
+              <p>点击上方分类开始播放</p>
+            </div>
           )}
         </section>
       </div>
